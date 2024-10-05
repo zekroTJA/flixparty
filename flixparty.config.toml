@@ -1,0 +1,5 @@
+log_level = "info"
+
+[connection]
+address = "redis://:foobar@127.0.0.1:16379/0"
+channel = "foo"
