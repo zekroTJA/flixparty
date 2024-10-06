@@ -8,11 +8,15 @@ use config::Config;
 use model::{Message, Op};
 use rdev::{listen, Event, EventType, Key};
 use redis::{Commands, Connection};
-use std::{str::FromStr, thread};
+use std::{env, str::FromStr, thread};
 use tracing::{debug, info};
 
 fn main() -> Result<()> {
-    let cfg = Config::from_file("flixparty.config.toml")?;
+    let config_path = env::args()
+        .nth(1)
+        .unwrap_or_else(|| "flixparty.config.toml".into());
+
+    let cfg = Config::from_file(config_path)?;
 
     let log_level = cfg
         .log_level
