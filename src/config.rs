@@ -14,9 +14,15 @@ pub struct Connection {
 }
 
 #[derive(Debug, Deserialize)]
+pub struct Keys {
+    pub toggle: Key,
+    pub playback: Key,
+}
+
+#[derive(Debug, Deserialize)]
 pub struct Config {
     pub log_level: Option<String>,
-    pub toggle_key: Option<Key>,
+    pub keys: Keys,
     pub connection: Connection,
 }
 

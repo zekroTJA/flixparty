@@ -6,7 +6,6 @@ use anyhow::Result;
 use config::Config;
 use model::{Message, Op};
 use periphery::PeripheryHandler;
-use rdev::Key;
 use redis::{Commands, Connection};
 use std::{env, str::FromStr, sync::Arc, thread};
 use tracing::{debug, info};
@@ -52,14 +51,13 @@ fn main() -> Result<()> {
         conn: pub_con,
         channel: cfg.connection.channel,
         client_id: client_id.clone(),
-        toggle_key: cfg.toggle_key.unwrap_or(Key::Space),
     };
 
-    let ph = Arc::new(PeripheryHandler::default());
+    let ph = Arc::new(PeripheryHandler::new(cfg.keys));
 
     let ph2 = ph.clone();
     thread::spawn(move || {
-        ph2.listen(move |key| conn.callback(key))
+        ph2.listen(move || conn.callback())
             .expect("keyboard listener");
     });
 
@@ -69,9 +67,6 @@ fn main() -> Result<()> {
         debug!("PUBSUB message received: {payload}");
 
         let msg = Message::from_json(&payload)?;
-        if msg.sender == client_id {
-            continue;
-        }
 
         match msg.op {
             Op::TogglePlay => ph.simulate()?,
@@ -84,20 +79,17 @@ pub struct Publisher {
     conn: Connection,
     channel: String,
     client_id: String,
-    toggle_key: Key,
 }
 
 impl Publisher {
-    fn callback(&mut self, key: Key) {
-        if key == self.toggle_key {
-            info!("Toggle key press event detected");
+    fn callback(&mut self) {
+        info!("Toggle key press event detected");
 
-            let msg = Message {
-                sender: self.client_id.clone(),
-                op: model::Op::TogglePlay,
-            };
+        let msg = Message {
+            sender: self.client_id.clone(),
+            op: model::Op::TogglePlay,
+        };
 
-            let _: () = self.conn.publish(&self.channel, msg.to_json()).unwrap();
-        }
+        let _: () = self.conn.publish(&self.channel, msg.to_json()).unwrap();
     }
 }
