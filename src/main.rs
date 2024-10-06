@@ -1,14 +1,14 @@
-mod clicker;
 mod config;
 mod model;
+mod periphery;
 
 use anyhow::Result;
-use clicker::Clicker;
 use config::Config;
 use model::{Message, Op};
+use periphery::{Clicker, PeripheryHandler};
 use rdev::{listen, Event, EventType, Key};
 use redis::{Commands, Connection};
-use std::{env, str::FromStr, thread};
+use std::{env, str::FromStr, sync::Arc, thread};
 use tracing::{debug, info};
 
 fn main() -> Result<()> {
@@ -54,11 +54,13 @@ fn main() -> Result<()> {
         client_id: client_id.clone(),
     };
 
-    thread::spawn(move || {
-        listen(move |e| conn.callback(e)).expect("keyboard listener");
-    });
+    let ph = Arc::new(PeripheryHandler::default());
 
-    let mut clicker = Clicker::new()?;
+    let ph2 = ph.clone();
+    thread::spawn(move || {
+        ph2.listen(move |key| conn.callback(key))
+            .expect("keyboard listener");
+    });
 
     loop {
         let msg = pubsub.get_message()?;
@@ -71,7 +73,7 @@ fn main() -> Result<()> {
         }
 
         match msg.op {
-            Op::TogglePlay => clicker.click_center()?,
+            Op::TogglePlay => ph.simulate()?,
             Op::Introduce => info!("New client has been connected: {}", msg.sender),
         }
     }
@@ -84,8 +86,8 @@ pub struct Publisher {
 }
 
 impl Publisher {
-    fn callback(&mut self, event: Event) {
-        if matches!(event.event_type, EventType::KeyPress(Key::Space)) {
+    fn callback(&mut self, key: Key) {
+        if matches!(key, Key::Space) {
             info!("Space event detected");
 
             let msg = Message {
