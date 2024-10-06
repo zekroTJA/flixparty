@@ -5,18 +5,6 @@ use std::{
     thread,
 };
 
-pub struct Clicker {}
-
-impl Clicker {
-    pub fn new() -> Result<Self> {
-        Ok(Self {})
-    }
-
-    pub fn click_center(&mut self) -> Result<()> {
-        Ok(())
-    }
-}
-
 #[derive(Default)]
 pub struct PeripheryHandler {
     last_cursor_pos: RwLock<(f64, f64)>,

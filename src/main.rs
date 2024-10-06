@@ -5,8 +5,8 @@ mod periphery;
 use anyhow::Result;
 use config::Config;
 use model::{Message, Op};
-use periphery::{Clicker, PeripheryHandler};
-use rdev::{listen, Event, EventType, Key};
+use periphery::PeripheryHandler;
+use rdev::Key;
 use redis::{Commands, Connection};
 use std::{env, str::FromStr, sync::Arc, thread};
 use tracing::{debug, info};
@@ -52,6 +52,7 @@ fn main() -> Result<()> {
         conn: pub_con,
         channel: cfg.connection.channel,
         client_id: client_id.clone(),
+        toggle_key: cfg.toggle_key.unwrap_or(Key::Space),
     };
 
     let ph = Arc::new(PeripheryHandler::default());
@@ -83,12 +84,13 @@ pub struct Publisher {
     conn: Connection,
     channel: String,
     client_id: String,
+    toggle_key: Key,
 }
 
 impl Publisher {
     fn callback(&mut self, key: Key) {
-        if matches!(key, Key::Space) {
-            info!("Space event detected");
+        if key == self.toggle_key {
+            info!("Toggle key press event detected");
 
             let msg = Message {
                 sender: self.client_id.clone(),

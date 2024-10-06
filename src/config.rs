@@ -3,6 +3,7 @@ use figment::{
     providers::{Format, Toml},
     Figment,
 };
+use rdev::Key;
 use serde::Deserialize;
 use std::path::Path;
 
@@ -15,6 +16,7 @@ pub struct Connection {
 #[derive(Debug, Deserialize)]
 pub struct Config {
     pub log_level: Option<String>,
+    pub toggle_key: Option<Key>,
     pub connection: Connection,
 }
 
