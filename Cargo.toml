@@ -7,15 +7,10 @@ edition = "2021"
 anyhow = "1.0.89"
 figment = { version = "0.10.19", features = ["toml"] }
 rdev = "0.5.3"
+enigo = { version = "0.2.1", default-features = false, features = ["x11rb"] }
 redis = "0.27.3"
 serde = { version = "1.0.210", features = ["derive"] }
 serde_json = "1.0.128"
 tracing = "0.1.40"
 tracing-subscriber = "0.3.18"
 xid = "1.1.1"
-
-[target.'cfg(linux)'.dependencies]
-enigo = { version = "0.2.1", features = ["x11rb"] }
-
-[target.'cfg(not(linux))'.dependencies]
-enigo = "0.2.1"
