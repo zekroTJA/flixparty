@@ -1,5 +1,8 @@
 log_level = "info"
-toggle_key = "Space"
+
+[keys]
+toggle = "KeyP"
+playback = "Space"
 
 [connection]
 address = "redis://:foobar@127.0.0.1:16379/0"
