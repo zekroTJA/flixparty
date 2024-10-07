@@ -1,9 +1,18 @@
 log_level = "info"
 
 [keys]
+# The key you press to trigger a pause-unpause on all
+# connected clients as well as on your client.
 toggle = "KeyP"
+# The key simulated by the clients to actually pause
+# and unpause the content in the active window.
 playback = "Space"
 
 [connection]
+# The address to the central Redis instance.
 address = "redis://:foobar@127.0.0.1:16379/0"
-channel = "foo"
+# The cannel to connect to. All clients in the same
+# channel will be connected and will be able to control
+# the playback for each client in the same channel.
+# The cannel can be any arbitrary string.
+channel = "party1"
