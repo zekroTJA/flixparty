@@ -9,13 +9,24 @@ use periphery::PeripheryHandler;
 use redis::{Commands, Connection};
 use std::{env, str::FromStr, sync::Arc, thread};
 use tracing::{debug, info};
+use yansi::Paint;
 
-fn main() -> Result<()> {
+fn main() {
+    if let Err(err) = run() {
+        println!("{} {}", "error:".red().bold(), err);
+    }
+}
+
+fn run() -> Result<()> {
     let config_path = env::args()
         .nth(1)
         .unwrap_or_else(|| "flixparty.config.toml".into());
 
     let cfg = Config::from_file(config_path)?;
+
+    if cfg.keys.playback == cfg.keys.toggle {
+        anyhow::bail!("playback and toggle key must not be the same key")
+    }
 
     let log_level = cfg
         .log_level
