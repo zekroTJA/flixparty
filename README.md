@@ -1,26 +1,24 @@
 # flixparty
 
-A very simple and janky tool to synchronize play-pause events across different PCs to watch video 
+A very simple and janky tool to synchronize play-pause events across different PCs to watch video
 content together on platforms, which do not support watch parties.
 
-> [!WARNING]  
-> Because this app is basically a keylogger, you might run into some antivirus issues when 
+> [!WARNING]
+> Because this app is basically a keylogger, you might run into some antivirus issues when
 > downloading the pre-compiled binaries. If this is the case, you might want to compile the
 > client locally on the target system.
 
 ## How does it work?
 
-Via the config, every client connects to a common Redis pub-sub channel. When a client detects a 
-key-press on the configured toggle-key (defaulty <kbd>Space</kbd>), an event is published in the
-pub-sub channel. All other clients listen to the toggle-event and will, when received, issue a
-"pause simulation" on the local machine. This means the cursor is moved to the center of the main
-screen, then a left mouse button press and release is issued - which should pause the playback -, 
-and after that, the cursor is moved back to the original location.
+Via the config, every client connects to a common Redis pub-sub channel. When a client detects a
+key-press on the configured toggle-key (defaulty <kbd>P</kbd>), an event is published in the
+pub-sub channel. All clients listen to the toggle-event and will, when received, issue a key press
+of the configured playback-key (defaultly <kbd>Space</kbd>) on the local machine. This should pause
+the currently playing content of the currently focussed window on all connected clients.
 
-**Why using mouse clicks to pause and unpause?** Sadly, rdev - the library used to listen to
-keyboard events, can not distinguish between real and simulated keyboard events. So this would
-end in an infinite feedback loop between all clients when the sender-key would also be simulated
-on the other clients.  
+**Why not use the same key for toggling as well as for the playback control?** Sadly, rdev - the crate
+used to detect and simulate keyboard events - can not distinguish between simulated and real keyboard
+events. Thus, binding both on the same key would result in a really unhandy infinite feedback loop.
 
 ## Setup
 
@@ -39,8 +37,8 @@ from). Alternatively, you can pass a path to a config file, if you want to store
 ./flixparty path/to/my/config.toml
 ```
 
-In the config, set the address of your redis instance as `address` in the `connection` block. Also, 
-set the name of the channel to be used for communication between the clients. This can be any 
+In the config, set the address of your redis instance as `address` in the `connection` block. Also,
+set the name of the channel to be used for communication between the clients. This can be any
 arbitrary string, but it must be the same one for all of the clients who should be connected. This
-way, you can also use the same Redis instance for multiple sessions by using different channel 
+way, you can also use the same Redis instance for multiple sessions by using different channel
 names, if you want.
