@@ -7,7 +7,13 @@ use config::Config;
 use model::{Message, Op};
 use periphery::PeripheryHandler;
 use redis::{Commands, Connection};
-use std::{env, str::FromStr, sync::Arc, thread};
+use std::{
+    env,
+    str::FromStr,
+    sync::{Arc, Mutex},
+    thread,
+    time::SystemTime,
+};
 use tracing::{debug, info};
 use yansi::Paint;
 
@@ -65,15 +71,20 @@ fn run() -> Result<()> {
     };
 
     let ph = Arc::new(PeripheryHandler::new(cfg.keys));
+    let last_local_trigger = Arc::new(Mutex::new(None));
 
-    let ph2 = ph.clone();
-    thread::spawn(move || {
-        let rec = ph2.listen().expect("keyboard listener");
-        loop {
-            rec.recv().expect("channel receive");
-            publisher.broadcast_toggle();
-        }
-    });
+    {
+        let ph = ph.clone();
+        let last_local_trigger = last_local_trigger.clone();
+        thread::spawn(move || {
+            let rec = ph.listen().expect("keyboard listener");
+            loop {
+                rec.recv().expect("channel receive");
+                *last_local_trigger.lock().expect("acquire lock") = Some(SystemTime::now());
+                publisher.broadcast_toggle();
+            }
+        });
+    }
 
     loop {
         let msg = pubsub.get_message()?;
@@ -83,7 +94,16 @@ fn run() -> Result<()> {
         let msg = Message::from_json(&payload)?;
 
         match msg.op {
-            Op::TogglePlay => ph.simulate_playback_press()?,
+            Op::TogglePlay => {
+                if msg.sender == client_id {
+                    let Some(v) = *last_local_trigger.lock().expect("mutex lock") else {
+                        panic!("last_local_trigger was None on self-sent event - this should not happen");
+                    };
+                    let now = SystemTime::now().duration_since(v)?;
+                    debug!("Trigger round trip time: {}ms", now.as_millis());
+                }
+                ph.simulate_playback_press()?;
+            }
             Op::Introduce => info!("New client has been connected: {}", msg.sender),
         }
     }
