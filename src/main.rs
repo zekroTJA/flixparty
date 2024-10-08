@@ -58,7 +58,7 @@ fn run() -> Result<()> {
     };
     let _: () = pub_con.publish(&cfg.connection.channel, msg.to_json())?;
 
-    let mut conn = Publisher {
+    let mut publisher = Publisher {
         conn: pub_con,
         channel: cfg.connection.channel,
         client_id: client_id.clone(),
@@ -68,8 +68,11 @@ fn run() -> Result<()> {
 
     let ph2 = ph.clone();
     thread::spawn(move || {
-        ph2.listen(move || conn.callback())
-            .expect("keyboard listener");
+        let rec = ph2.listen().expect("keyboard listener");
+        loop {
+            rec.recv().expect("channel receive");
+            publisher.broadcast_toggle();
+        }
     });
 
     loop {
@@ -80,7 +83,7 @@ fn run() -> Result<()> {
         let msg = Message::from_json(&payload)?;
 
         match msg.op {
-            Op::TogglePlay => ph.simulate()?,
+            Op::TogglePlay => ph.simulate_playback_press()?,
             Op::Introduce => info!("New client has been connected: {}", msg.sender),
         }
     }
@@ -93,7 +96,7 @@ pub struct Publisher {
 }
 
 impl Publisher {
-    fn callback(&mut self) {
+    fn broadcast_toggle(&mut self) {
         info!("Toggle key press event detected");
 
         let msg = Message {

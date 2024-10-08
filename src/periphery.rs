@@ -1,6 +1,9 @@
 use anyhow::Result;
 use rdev::{listen, simulate, Event, EventType};
-use std::{sync::mpsc, thread};
+use std::{
+    sync::mpsc::{self, Receiver},
+    thread,
+};
 
 use crate::config::Keys;
 
@@ -13,30 +16,24 @@ impl PeripheryHandler {
         Self { keys }
     }
 
-    pub fn listen<C>(&self, mut callback: C) -> Result<()>
-    where
-        C: FnMut(),
-    {
+    pub fn listen(&self) -> Result<Receiver<()>> {
         let (sender, receiver) = mpsc::channel();
 
+        let toggle_key = self.keys.toggle;
         thread::spawn(move || {
             let sender = sender.clone();
             let cb = move |e: Event| {
-                if let EventType::KeyPress(key) = e.event_type {
-                    sender.send(key).expect("channel send")
+                if matches!(e.event_type, EventType::KeyPress(key) if key == toggle_key) {
+                    sender.send(()).expect("channel send");
                 }
             };
             listen(cb).expect("listen hook");
         });
 
-        loop {
-            if receiver.recv()? == self.keys.toggle {
-                callback()
-            }
-        }
+        Ok(receiver)
     }
 
-    pub fn simulate(&self) -> Result<()> {
+    pub fn simulate_playback_press(&self) -> Result<()> {
         simulate(&EventType::KeyPress(self.keys.playback))?;
         simulate(&EventType::KeyRelease(self.keys.playback))?;
         Ok(())
