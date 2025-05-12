@@ -11,7 +11,7 @@ use std::str::FromStr;
 use std::sync::{Arc, Mutex};
 use std::time::SystemTime;
 use std::{env, thread};
-use tracing::{debug, info};
+use tracing::{debug, error, info};
 use yansi::Paint;
 
 fn main() {
@@ -121,6 +121,8 @@ impl Publisher {
             op: model::Op::TogglePlay,
         };
 
-        let _: () = self.conn.publish(&self.channel, msg.to_json()).unwrap();
+        if let Err(err) = self.conn.publish::<_, _, ()>(&self.channel, msg.to_json()) {
+            error!("Failed publishing keypress event to redis connection: {err}")
+        };
     }
 }

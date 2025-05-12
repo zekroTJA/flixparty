@@ -19,6 +19,6 @@ impl Message {
     }
 
     pub fn to_json(&self) -> String {
-        serde_json::ser::to_string(self).unwrap()
+        serde_json::ser::to_string(self).expect("encoding message to JSON")
     }
 }
