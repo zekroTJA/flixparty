@@ -17,16 +17,16 @@ jobs:
           #   os: ubuntu-20.04
           #   target: x86_64-unknown-freebsd
           - os_name: Linux-x86_64
-            os: ubuntu-20.04
+            os: ubuntu-latest
             target: x86_64-unknown-linux-musl
           - os_name: Linux-aarch64
-            os: ubuntu-20.04
+            os: ubuntu-latest
             target: aarch64-unknown-linux-musl
           - os_name: Linux-arm
-            os: ubuntu-20.04
+            os: ubuntu-latest
             target: arm-unknown-linux-musleabi
           - os_name: Linux-riscv64
-            os: ubuntu-20.04
+            os: ubuntu-latest
             target: riscv64gc-unknown-linux-gnu
           - os_name: Windows-aarch64
             os: windows-latest
