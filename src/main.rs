@@ -7,13 +7,10 @@ use config::Config;
 use model::{Message, Op};
 use periphery::PeripheryHandler;
 use redis::{Commands, Connection};
-use std::{
-    env,
-    str::FromStr,
-    sync::{Arc, Mutex},
-    thread,
-    time::SystemTime,
-};
+use std::str::FromStr;
+use std::sync::{Arc, Mutex};
+use std::time::SystemTime;
+use std::{env, thread};
 use tracing::{debug, info};
 use yansi::Paint;
 

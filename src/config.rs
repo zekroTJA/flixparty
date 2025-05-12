@@ -1,8 +1,6 @@
 use anyhow::Result;
-use figment::{
-    providers::{Format, Toml},
-    Figment,
-};
+use figment::providers::{Format, Toml};
+use figment::Figment;
 use rdev::Key;
 use serde::Deserialize;
 use std::path::Path;

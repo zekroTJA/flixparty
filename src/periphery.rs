@@ -1,11 +1,8 @@
+use crate::config::Keys;
 use anyhow::Result;
 use rdev::{listen, simulate, Event, EventType};
-use std::{
-    sync::mpsc::{self, Receiver},
-    thread,
-};
-
-use crate::config::Keys;
+use std::sync::mpsc::{self, Receiver};
+use std::thread;
 
 pub struct PeripheryHandler {
     keys: Keys,
