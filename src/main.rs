@@ -1,18 +1,22 @@
-mod config;
-mod model;
-mod periphery;
-
+use crate::retry::Retry;
 use anyhow::Result;
 use config::Config;
 use model::{Message, Op};
 use periphery::PeripheryHandler;
-use redis::{Commands, Connection};
+use redis::{Commands, Connection, ErrorKind};
 use std::str::FromStr;
 use std::sync::{Arc, Mutex};
-use std::time::SystemTime;
+use std::time::{Duration, SystemTime};
 use std::{env, thread};
 use tracing::{debug, error, info};
 use yansi::Paint;
+
+mod config;
+mod model;
+mod periphery;
+mod retry;
+
+const MAX_RETRIES: usize = 5;
 
 fn main() {
     if let Err(err) = run() {
@@ -33,7 +37,8 @@ fn run() -> Result<()> {
 
     let log_level = cfg
         .log_level
-        .map(|l| tracing::Level::from_str(&l))
+        .as_ref()
+        .map(|l| tracing::Level::from_str(l))
         .transpose()?
         .unwrap_or(tracing::Level::INFO);
 
@@ -42,7 +47,34 @@ fn run() -> Result<()> {
         .with_writer(std::io::stdout)
         .init();
 
-    let client = redis::Client::open(cfg.connection.address)?;
+    for (_, remaining) in Retry::new(MAX_RETRIES, Duration::from_secs(3)) {
+        if let Err(err) = connect(&cfg) {
+            if let Some(redis_err) = err.downcast_ref::<redis::RedisError>() {
+                match redis_err.kind() {
+                    ErrorKind::ParseError
+                    | ErrorKind::AuthenticationFailed
+                    | ErrorKind::ReadOnly => return Err(err),
+                    _ => {
+                        error!(
+                            "connection failed: {err}; trying to reconnect ({}/{}) ...",
+                            MAX_RETRIES - remaining,
+                            MAX_RETRIES
+                        );
+                        continue;
+                    }
+                }
+            }
+            return Err(err);
+        }
+    }
+
+    Err(anyhow::anyhow!(
+        "Connection failed after {MAX_RETRIES} consecutive retries"
+    ))
+}
+
+fn connect(cfg: &Config) -> Result<()> {
+    let client = redis::Client::open(cfg.connection.address.as_str())?;
     info!("Redis connection established");
 
     let client_id = xid::new().to_string();
@@ -63,11 +95,11 @@ fn run() -> Result<()> {
 
     let mut publisher = Publisher {
         conn: pub_con,
-        channel: cfg.connection.channel,
+        channel: cfg.connection.channel.clone(),
         client_id: client_id.clone(),
     };
 
-    let ph = Arc::new(PeripheryHandler::new(cfg.keys));
+    let ph = Arc::new(PeripheryHandler::new(cfg.keys.clone()));
     let last_local_trigger = Arc::new(Mutex::new(None));
 
     {

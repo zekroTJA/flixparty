@@ -11,7 +11,7 @@ pub struct Connection {
     pub channel: String,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, Clone)]
 pub struct Keys {
     pub toggle: Key,
     pub playback: Key,
