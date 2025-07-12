@@ -48,22 +48,22 @@ fn run() -> Result<()> {
         .init();
 
     for (_, remaining) in Retry::new(MAX_RETRIES, Duration::from_secs(3)) {
-        if let Err(err) = connect(&cfg) {
-            if let Some(redis_err) = err.downcast_ref::<redis::RedisError>() {
-                match redis_err.kind() {
-                    ErrorKind::ParseError
-                    | ErrorKind::AuthenticationFailed
-                    | ErrorKind::ReadOnly => return Err(err),
-                    _ => {
-                        error!(
-                            "connection failed: {err}; trying to reconnect ({remaining} retries remaining) ...",
-                        );
-                        continue;
-                    }
-                }
-            }
+        let Err(err) = connect(&cfg) else {
+            continue;
+        };
+
+        let Some(redis_err) = err.downcast_ref::<redis::RedisError>() else {
+            return Err(err);
+        };
+
+        if matches!(
+            redis_err.kind(),
+            ErrorKind::ParseError | ErrorKind::AuthenticationFailed | ErrorKind::ReadOnly
+        ) {
             return Err(err);
         }
+
+        error!("connection failed: {err}; trying to reconnect ({remaining} retries remaining) ...",);
     }
 
     Err(anyhow::anyhow!(
