@@ -31,7 +31,7 @@ impl Iterator for Retry {
             let since_last_retry = now.duration_since(last_retry).ok()?;
             if since_last_retry < self.threshold {
                 self.over_threshold_iterations += 1;
-            } else {
+            } else if self.over_threshold_iterations > 0 {
                 self.over_threshold_iterations -= 1;
             }
         }

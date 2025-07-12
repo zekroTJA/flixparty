@@ -8,7 +8,7 @@ use std::str::FromStr;
 use std::sync::{Arc, Mutex};
 use std::time::{Duration, SystemTime};
 use std::{env, thread};
-use tracing::{debug, error, info, warn};
+use tracing::{debug, error, info};
 use yansi::Paint;
 
 mod config;
@@ -56,18 +56,13 @@ fn run() -> Result<()> {
                     | ErrorKind::ReadOnly => return Err(err),
                     _ => {
                         error!(
-                            "connection failed: {err}; trying to reconnect ({}/{}) ...",
-                            MAX_RETRIES - remaining,
-                            MAX_RETRIES
+                            "connection failed: {err}; trying to reconnect ({remaining} retries remaining) ...",
                         );
                         continue;
                     }
                 }
             }
             return Err(err);
-        } else {
-            warn!("Idk what happened, but here we are. Let's wait 5 seconds for good measure.");
-            thread::sleep(Duration::from_secs(5));
         }
     }
 
