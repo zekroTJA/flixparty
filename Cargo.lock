@@ -182,7 +182,7 @@ dependencies = [
 
 [[package]]
 name = "flixparty"
-version = "0.5.0"
+version = "0.5.2"
 dependencies = [
  "anyhow",
  "figment",
