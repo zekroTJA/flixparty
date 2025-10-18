@@ -1,14 +1,18 @@
-use serde::{Deserialize, Serialize};
+use serde::Serialize;
+use std::fmt;
 
-#[derive(Serialize, Deserialize, Debug)]
-pub struct ConnectionParams {
-    pub address: String,
-    pub channel: String,
-    pub auth: Option<ConnectionAuth>,
+#[derive(Serialize, Debug)]
+pub struct Error {
+    pub message: String,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
-pub struct ConnectionAuth {
-    pub username: Option<String>,
-    pub password: String,
+impl<T> From<T> for Error
+where
+    T: fmt::Display,
+{
+    fn from(value: T) -> Self {
+        Self {
+            message: value.to_string(),
+        }
+    }
 }
