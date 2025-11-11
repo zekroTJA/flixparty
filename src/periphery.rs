@@ -35,9 +35,8 @@ impl PeripheryHandler {
 
     pub fn simulate_playback_press(&self) -> Result<()> {
         // If no key is defined in the config, MediaPalyPause key is used.
-        let key = self.keys.playback.unwrap_or(Key::Unknown(179));
-        simulate(&EventType::KeyPress(key))?;
-        simulate(&EventType::KeyRelease(key))?;
+        simulate(&EventType::KeyPress(self.keys.playback))?;
+        simulate(&EventType::KeyRelease(self.keys.playback))?;
         Ok(())
     }
 }

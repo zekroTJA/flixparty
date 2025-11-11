@@ -31,16 +31,11 @@ fn run() -> Result<()> {
 
     let cfg = Config::from_file(config_path)?;
 
-    if cfg.keys.playback.is_some_and(|k| k == cfg.keys.toggle) {
+    if cfg.keys.playback == cfg.keys.toggle {
         anyhow::bail!("playback and toggle key must not be the same key")
     }
 
-    let log_level = cfg
-        .log_level
-        .as_ref()
-        .map(|l| tracing::Level::from_str(l))
-        .transpose()?
-        .unwrap_or(tracing::Level::INFO);
+    let log_level = tracing::Level::from_str(&cfg.log_level)?;
 
     tracing_subscriber::fmt()
         .with_max_level(log_level)
