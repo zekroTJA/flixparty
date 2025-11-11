@@ -14,7 +14,7 @@ pub struct Connection {
 #[derive(Debug, Deserialize, Clone)]
 pub struct Keys {
     pub toggle: Key,
-    pub playback: Key,
+    pub playback: Option<Key>,
 }
 
 #[derive(Debug, Deserialize)]

@@ -6,7 +6,8 @@ log_level = "info"
 toggle = "KeyP"
 # The key simulated by the clients to actually pause
 # and unpause the content in the active window.
-playback = "Space"
+# When this is unspecified, MediaPlayPause will be used.
+# playback = "Space"
 
 [connection]
 # The address to the central Redis instance.

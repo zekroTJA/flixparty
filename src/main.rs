@@ -31,7 +31,7 @@ fn run() -> Result<()> {
 
     let cfg = Config::from_file(config_path)?;
 
-    if cfg.keys.playback == cfg.keys.toggle {
+    if cfg.keys.playback.is_some_and(|k| k == cfg.keys.toggle) {
         anyhow::bail!("playback and toggle key must not be the same key")
     }
 
