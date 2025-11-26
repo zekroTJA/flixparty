@@ -9,7 +9,7 @@ fn default_toggle_key() -> Key {
     Key::KeyP
 }
 
-fn default_palyback_key() -> Key {
+fn default_playback_key() -> Key {
     Key::Unknown(179)
 }
 
@@ -32,14 +32,24 @@ pub struct Connection {
 pub struct Keys {
     #[serde(default = "default_toggle_key")]
     pub toggle: Key,
-    #[serde(default = "default_palyback_key")]
+    #[serde(default = "default_playback_key")]
     pub playback: Key,
+}
+
+impl Default for Keys {
+    fn default() -> Self {
+        Self {
+            toggle: default_toggle_key(),
+            playback: default_playback_key(),
+        }
+    }
 }
 
 #[derive(Debug, Deserialize)]
 pub struct Config {
     #[serde(default = "default_loglevel")]
     pub log_level: String,
+    #[serde(default)]
     pub keys: Keys,
     pub connection: Connection,
 }

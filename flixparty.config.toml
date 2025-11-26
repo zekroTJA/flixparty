@@ -1,9 +1,12 @@
-log_level = "info"
+# The log level.
+# default value: "info"
+# log_level = "info"
 
-[keys]
+# [keys]
 # The key you press to trigger a pause-unpause on all
 # connected clients as well as on your client.
-toggle = "KeyP"
+# default value: "KeyP"
+# toggle = "KeyP"
 # The key simulated by the clients to actually pause
 # and unpause the content in the active window.
 # When this is unspecified, MediaPlayPause will be used.
@@ -16,4 +19,5 @@ address = "redis://:foobar@127.0.0.1:16379/0"
 # channel will be connected and will be able to control
 # the playback for each client in the same channel.
 # The cannel can be any arbitrary string.
-channel = "party1"
+# default value: "flixparty"
+# channel = "flixparty"

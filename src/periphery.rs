@@ -1,6 +1,6 @@
 use crate::config::Keys;
 use anyhow::Result;
-use rdev::{listen, simulate, Event, EventType, Key};
+use rdev::{listen, simulate, Event, EventType};
 use std::sync::mpsc::{self, Receiver};
 use std::thread;
 use tracing::error;
