@@ -1,15 +1,15 @@
-# The log level.
-# default value: "info"
+# # The log level.
+# # default value: "info"
 # log_level = "info"
 
 # [keys]
-# The key you press to trigger a pause-unpause on all
-# connected clients as well as on your client.
+# # The key you press to trigger a pause-unpause on all
+# # connected clients as well as on your client.
 # default value: "KeyP"
 # toggle = "KeyP"
-# The key simulated by the clients to actually pause
-# and unpause the content in the active window.
-# When this is unspecified, MediaPlayPause will be used.
+# # The key simulated by the clients to actually pause
+# # and unpause the content in the active window.
+# # When this is unspecified, MediaPlayPause will be used.
 # playback = "Space"
 
 [connection]
@@ -21,3 +21,18 @@ address = "redis://:foobar@127.0.0.1:16379/0"
 # The cannel can be any arbitrary string.
 # default value: "flixparty"
 # channel = "flixparty"
+
+# # On windows, flixparty checks if a browser window is in focus before sending
+# # the play command on key trigger or on receiving a play command. This will only
+# # work on windows systems currently though.
+# # Also, either use title_contains or class, both at the same time will not work.
+# [condition]
+# # Checks if the currently focussed window contains the given string
+# title_contains = "Netflix"
+# # Checks if the currently focussed window has the defiend class
+# # Class names for common browsers are
+# #   "Chrome_WidgetWin_1"      -> Chrome, Edge (Chromium)
+# #   "MozillaWindowClass"      -> Firefox
+# #   "OperaWindowClass"        -> Opera (older)
+# #   "ApplicationFrameWindow"  -> Edge legacy (UWP shell)
+# class = "Chrome_WidgetWin_1"

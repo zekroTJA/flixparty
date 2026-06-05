@@ -8,13 +8,15 @@ use std::str::FromStr;
 use std::sync::{Arc, Mutex};
 use std::time::{Duration, SystemTime};
 use std::{env, thread};
-use tracing::{debug, error, info};
+use tracing::{debug, error, info, warn};
 use yansi::Paint;
 
 mod config;
 mod model;
 mod periphery;
 mod retry;
+
+mod condition;
 
 const MAX_RETRIES: usize = 5;
 
@@ -36,11 +38,12 @@ fn run() -> Result<()> {
     }
 
     let log_level = tracing::Level::from_str(&cfg.log_level)?;
-
     tracing_subscriber::fmt()
         .with_max_level(log_level)
         .with_writer(std::io::stdout)
         .init();
+
+    debug!("cfg: {cfg:#?}");
 
     for (_, remaining) in Retry::new(MAX_RETRIES, Duration::from_secs(3)) {
         let Err(err) = connect(&cfg) else {
@@ -98,10 +101,18 @@ fn connect(cfg: &Config) -> Result<()> {
     {
         let ph = ph.clone();
         let last_local_trigger = last_local_trigger.clone();
+        let cond = cfg.condition.clone();
+
         thread::spawn(move || {
             let rec = ph.listen().expect("keyboard listener");
             loop {
                 rec.recv().expect("channel receive");
+
+                if !condition::is_browser_in_focus(cond.as_ref()) {
+                    warn!("ignoring client play command because focussed window condition does not match");
+                    continue;
+                }
+
                 *last_local_trigger.lock().expect("acquire lock") = Some(SystemTime::now());
                 publisher.broadcast_toggle();
             }
@@ -123,6 +134,10 @@ fn connect(cfg: &Config) -> Result<()> {
                     };
                     let now = SystemTime::now().duration_since(v)?;
                     debug!("Trigger round trip time: {}ms", now.as_millis());
+                }
+                if !condition::is_browser_in_focus(cfg.condition.as_ref()) {
+                    warn!("ignoring external play command because focussed window condition does not match");
+                    continue;
                 }
                 ph.simulate_playback_press()?;
             }

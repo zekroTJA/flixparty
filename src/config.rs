@@ -45,6 +45,13 @@ impl Default for Keys {
     }
 }
 
+#[derive(Deserialize, Clone, Debug)]
+#[serde(rename_all = "snake_case")]
+pub enum Condition {
+    Class(String),
+    TitleContains(String),
+}
+
 #[derive(Debug, Deserialize)]
 pub struct Config {
     #[serde(default = "default_loglevel")]
@@ -52,6 +59,9 @@ pub struct Config {
     #[serde(default)]
     pub keys: Keys,
     pub connection: Connection,
+
+    #[cfg(windows)]
+    pub condition: Option<Condition>,
 }
 
 impl Config {
