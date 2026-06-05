@@ -59,8 +59,6 @@ pub struct Config {
     #[serde(default)]
     pub keys: Keys,
     pub connection: Connection,
-
-    #[cfg(windows)]
     pub condition: Option<Condition>,
 }
 
