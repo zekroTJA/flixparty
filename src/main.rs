@@ -7,7 +7,7 @@ use redis::{Commands, Connection, ErrorKind};
 use std::str::FromStr;
 use std::sync::{Arc, Mutex};
 use std::time::{Duration, SystemTime};
-use std::{env, thread};
+use std::{env, process, thread};
 use tracing::{debug, error, info, warn};
 use yansi::Paint;
 
@@ -23,15 +23,20 @@ const MAX_RETRIES: usize = 5;
 fn main() {
     cfg_if::cfg_if! {
         if #[cfg(target_os = "macos")] {
+            // The watcher task needs to run in the main thread or else it won't
+            // receive workspace events. Therefore, the run() function needs to
+            // run in a separate thread.
             std::thread::spawn(|| {
                 if let Err(err) = run() {
                     println!("{} {}", "error:".red().bold(), err);
+                    process::exit(1);
                 }
             });
             condition::start_watcher()
         } else {
             if let Err(err) = run() {
                 println!("{} {}", "error:".red().bold(), err);
+                process::exit(1);
             }
         }
 
