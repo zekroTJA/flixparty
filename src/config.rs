@@ -10,7 +10,19 @@ fn default_toggle_key() -> Key {
 }
 
 fn default_playback_key() -> Key {
-    Key::Unknown(179)
+    // Windows: VK_MEDIA_PLAY_PAUSE (0xB3).
+    #[cfg(target_os = "windows")]
+    return Key::Unknown(179);
+
+    // Linux (X11): XF86AudioPlay keycode.
+    #[cfg(target_os = "linux")]
+    return Key::Unknown(172);
+
+    // macOS: the dedicated play/pause key is a system-defined (NX) event, not a
+    // CGKeyCode, so rdev cannot simulate it. Space toggles play/pause in the
+    // focused media player instead.
+    #[cfg(target_os = "macos")]
+    return Key::Space;
 }
 
 fn default_channel() -> String {
