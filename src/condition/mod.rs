@@ -2,6 +2,9 @@ cfg_if::cfg_if! {
     if #[cfg(target_os = "windows")] {
         mod windows;
         pub use windows::*;
+    } else if #[cfg(target_os = "macos")] {
+        mod macos;
+        pub use macos::*;
     } else {
         pub fn is_browser_in_focus(matcher: Option<&crate::config::Condition>) -> bool {
             if matcher.is_some() {

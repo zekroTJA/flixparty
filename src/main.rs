@@ -21,8 +21,20 @@ mod condition;
 const MAX_RETRIES: usize = 5;
 
 fn main() {
-    if let Err(err) = run() {
-        println!("{} {}", "error:".red().bold(), err);
+    cfg_if::cfg_if! {
+        if #[cfg(target_os = "macos")] {
+            std::thread::spawn(|| {
+                if let Err(err) = run() {
+                    println!("{} {}", "error:".red().bold(), err);
+                }
+            });
+            condition::start_watcher()
+        } else {
+            if let Err(err) = run() {
+                println!("{} {}", "error:".red().bold(), err);
+            }
+        }
+
     }
 }
 

@@ -1,6 +1,7 @@
 # # The log level.
 # # default value: "info"
 # log_level = "info"
+log_level = "debug"
 
 # [keys]
 # # The key you press to trigger a pause-unpause on all
