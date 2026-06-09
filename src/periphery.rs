@@ -1,6 +1,6 @@
 use crate::config::Keys;
 use anyhow::Result;
-use rdev::{listen, simulate, Event, EventType};
+use rdev::{Event, EventType, listen, simulate};
 use std::sync::mpsc::{self, Receiver};
 use std::thread;
 use tracing::error;
@@ -21,10 +21,10 @@ impl PeripheryHandler {
         thread::spawn(move || {
             let sender = sender.clone();
             let cb = move |e: Event| {
-                if matches!(e.event_type, EventType::KeyPress(key) if key == toggle_key) {
-                    if let Err(err) = sender.send(()) {
-                        error!("Failed sending keypress event to mpsc channel: {err}")
-                    }
+                if matches!(e.event_type, EventType::KeyPress(key) if key == toggle_key)
+                    && let Err(err) = sender.send(())
+                {
+                    error!("Failed sending keypress event to mpsc channel: {err}")
                 }
             };
             listen(cb).expect("listen hook");
