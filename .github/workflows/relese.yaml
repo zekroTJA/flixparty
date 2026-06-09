@@ -13,9 +13,6 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          # - os_name: FreeBSD-x86_64
-          #   os: ubuntu-20.04
-          #   target: x86_64-unknown-freebsd
           - os_name: Linux-x86_64
             os: ubuntu-latest
             target: x86_64-unknown-linux-musl
@@ -51,25 +48,11 @@ jobs:
         run: |
           sudo apt-get update --yes
           sudo apt-get upgrade --yes
-          sudo apt-get install --yes libxdo-dev libxkbcommon-dev libxi-dev libxtst-dev libxext-dev xdotool
+          sudo apt-get install --yes libx11-dev libxdo-dev libxcb1-dev libxcb-util-dev libxkbcommon-dev libxi-dev libxtst-dev libxext-dev xdotool
         if: contains(matrix.os, 'ubuntu')
       - name: Install musl-tools on Linux
         run: sudo apt-get install --yes musl-tools
         if: contains(matrix.target, 'musl')
-      # - name: Get xi.pc path and append to PKG_CONFIG_PATH
-      #   run: |
-      #     XIPATH="$(find /usr/lib -name 'xi.pc')"
-      #     if [ -z "$XIPATH" ]; then
-      #       echo "error: could not find xi.pc on the system"
-      #       exit 1
-      #     fi
-      #     if [ -z "$PKG_CONFIG_PATH" ]; then
-      #       echo "PKG_CONFIG_PATH=$XIPATH" >> $GITHUB_ENV
-      #     else
-      #       echo "PKG_CONFIG_PATH=$XIPATH:$PKG_CONFIG_PATH" >> $GITHUB_ENV
-      #     fi
-      #     cat "$GITHUB_ENV"
-      #   if: contains(matrix.os, 'ubuntu')
       - name: Build binary
         uses: houseabsolute/actions-rust-cross@v0
         env:
@@ -92,4 +75,3 @@ jobs:
         with:
           draft: true
           files: ${{ env.ASSET_PATH }}
-          # body_path: Changes.md
