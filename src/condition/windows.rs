@@ -1,4 +1,3 @@
-use crate::config::Condition;
 use windows::Win32::UI::WindowsAndMessaging::{GetClassNameW, GetForegroundWindow, GetWindowTextW};
 
 fn get_foreground_window_info() -> Option<(String, String)> {
@@ -24,16 +23,18 @@ fn get_foreground_window_info() -> Option<(String, String)> {
     }
 }
 
-pub fn is_browser_in_focus(matcher: Option<&Condition>) -> bool {
-    let Some((title, class)) = get_foreground_window_info() else {
+pub fn is_browser_in_focus(
+    class: Option<impl AsRef<str>>,
+    title_contains: Option<impl AsRef<str>>,
+) -> bool {
+    let Some((fg_title, fg_class)) = get_foreground_window_info() else {
         return false;
     };
 
-    if let Some(matcher) = matcher {
-        return match matcher {
-            Condition::Class(v) => &class == v,
-            Condition::TitleContains(v) => title.contains(v),
-        };
+    if class.is_some_and(|c| c.as_ref() == &fg_class)
+        || title_contains.is_some_and(|t| fg_title.contains(t.as_ref()))
+    {
+        return true;
     }
 
     let browser_classes = [
@@ -45,8 +46,8 @@ pub fn is_browser_in_focus(matcher: Option<&Condition>) -> bool {
 
     let browser_title_hints = ["Chrome", "Firefox", "Edge", "Opera", "Brave", "Vivaldi"];
 
-    let class_match = browser_classes.iter().any(|&c| class == c);
-    let title_match = browser_title_hints.iter().any(|&t| title.contains(t));
+    let class_match = browser_classes.iter().any(|&c| fg_class == c);
+    let title_match = browser_title_hints.iter().any(|&t| fg_title.contains(t));
 
     class_match || title_match
 }

@@ -58,10 +58,22 @@ impl Default for Keys {
 }
 
 #[derive(Deserialize, Clone, Debug)]
-#[serde(rename_all = "snake_case")]
-pub enum Condition {
-    Class(String),
-    TitleContains(String),
+pub struct Condition {
+    pub class: Option<String>,
+    pub title_contains: Option<String>,
+    pub block_trigger: bool,
+    pub block_receive: bool,
+}
+
+impl Default for Condition {
+    fn default() -> Self {
+        Self {
+            class: None,
+            title_contains: None,
+            block_trigger: true,
+            block_receive: false,
+        }
+    }
 }
 
 #[derive(Debug, Deserialize)]
@@ -71,7 +83,7 @@ pub struct Config {
     #[serde(default)]
     pub keys: Keys,
     pub connection: Connection,
-    pub condition: Option<Condition>,
+    pub condition: Condition,
 }
 
 impl Config {

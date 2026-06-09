@@ -125,7 +125,12 @@ fn connect(cfg: &Config) -> Result<()> {
             loop {
                 rec.recv().expect("channel receive");
 
-                if !condition::is_browser_in_focus(cond.as_ref()) {
+                if cond.block_trigger
+                    && !condition::is_browser_in_focus(
+                        cond.class.as_ref(),
+                        cond.title_contains.as_ref(),
+                    )
+                {
                     warn!("ignoring client play command because focussed window condition does not match");
                     continue;
                 }
@@ -152,7 +157,12 @@ fn connect(cfg: &Config) -> Result<()> {
                     let now = SystemTime::now().duration_since(v)?;
                     debug!("Trigger round trip time: {}ms", now.as_millis());
                 }
-                if !condition::is_browser_in_focus(cfg.condition.as_ref()) {
+                if cfg.condition.block_receive
+                    && !condition::is_browser_in_focus(
+                        cfg.condition.class.as_ref(),
+                        cfg.condition.title_contains.as_ref(),
+                    )
+                {
                     warn!("ignoring external play command because focussed window condition does not match");
                     continue;
                 }

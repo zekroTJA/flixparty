@@ -1,4 +1,3 @@
-use crate::config::Condition;
 use frontmost::app::FrontmostApp;
 use frontmost::{start_nsrunloop, Detector};
 use std::sync::{Mutex, OnceLock};
@@ -31,17 +30,19 @@ pub fn start_watcher() {
     start_nsrunloop!();
 }
 
-pub fn is_browser_in_focus(matcher: Option<&Condition>) -> bool {
+pub fn is_browser_in_focus(
+    class: Option<impl AsRef<str>>,
+    title_contains: Option<impl AsRef<str>>,
+) -> bool {
     let Some(app) = app_state().lock().ok() else {
         error!("failed getting app_state mutex guard");
         return false;
     };
 
-    if let Some(matcher) = matcher {
-        return match matcher {
-            Condition::Class(v) => v.as_str() == app.as_str(),
-            Condition::TitleContains(v) => app.contains(v),
-        };
+    if class.is_some_and(|c| c.as_ref() == app.as_str())
+        || title_contains.is_some_and(|t| app.contains(t.as_ref()))
+    {
+        return true;
     }
 
     let browser_apps = [
