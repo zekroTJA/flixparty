@@ -73,7 +73,11 @@ fn run() -> Result<()> {
 
         if matches!(
             redis_err.kind(),
-            ErrorKind::ParseError | ErrorKind::AuthenticationFailed | ErrorKind::ReadOnly
+            ErrorKind::Parse
+                | ErrorKind::AuthenticationFailed
+                | ErrorKind::Client
+                | ErrorKind::InvalidClientConfig
+                | ErrorKind::Extension
         ) {
             return Err(err);
         }
@@ -131,7 +135,9 @@ fn connect(cfg: &Config) -> Result<()> {
                         cond.title_contains.as_ref(),
                     )
                 {
-                    warn!("ignoring client play command because focussed window condition does not match");
+                    warn!(
+                        "ignoring client play command because focussed window condition does not match"
+                    );
                     continue;
                 }
 
@@ -152,7 +158,9 @@ fn connect(cfg: &Config) -> Result<()> {
             Op::TogglePlay => {
                 if msg.sender == client_id {
                     let Some(v) = *last_local_trigger.lock().expect("mutex lock") else {
-                        panic!("last_local_trigger was None on self-sent event - this should not happen");
+                        panic!(
+                            "last_local_trigger was None on self-sent event - this should not happen"
+                        );
                     };
                     let now = SystemTime::now().duration_since(v)?;
                     debug!("Trigger round trip time: {}ms", now.as_millis());
@@ -163,7 +171,9 @@ fn connect(cfg: &Config) -> Result<()> {
                         cfg.condition.title_contains.as_ref(),
                     )
                 {
-                    warn!("ignoring external play command because focussed window condition does not match");
+                    warn!(
+                        "ignoring external play command because focussed window condition does not match"
+                    );
                     continue;
                 }
                 ph.simulate_playback_press()?;
