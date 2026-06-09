@@ -1,6 +1,6 @@
 use anyhow::Result;
-use figment::providers::{Format, Toml};
 use figment::Figment;
+use figment::providers::{Format, Toml};
 use rdev::Key;
 use serde::Deserialize;
 use std::path::Path;
@@ -33,6 +33,10 @@ fn default_loglevel() -> String {
     "info".to_string()
 }
 
+fn default_true() -> bool {
+    true
+}
+
 #[derive(Debug, Deserialize)]
 pub struct Connection {
     pub address: String,
@@ -59,9 +63,13 @@ impl Default for Keys {
 
 #[derive(Deserialize, Clone, Debug)]
 pub struct Condition {
+    #[serde(default)]
     pub class: Option<String>,
+    #[serde(default)]
     pub title_contains: Option<String>,
+    #[serde(default = "default_true")]
     pub block_trigger: bool,
+    #[serde(default)]
     pub block_receive: bool,
 }
 
@@ -83,6 +91,7 @@ pub struct Config {
     #[serde(default)]
     pub keys: Keys,
     pub connection: Connection,
+    #[serde(default)]
     pub condition: Condition,
 }
 
