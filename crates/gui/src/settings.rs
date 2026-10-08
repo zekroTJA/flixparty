@@ -45,4 +45,3 @@ pub fn save(cfg: &Config) -> Result<()> {
     info!("Saved settings to {}", path.display());
     Ok(())
 }
-

@@ -1,6 +1,8 @@
 use crate::log_window::open_log_window;
 use crate::state::{ActivityKind, Globals, KeyTarget, Member, SessionInfo, Status, View};
-use crate::widgets::{ACCENT, DANGER, MUTED, SUCCESS, WARNING, dot, error_banner, field, section};
+use crate::widgets::{
+    ACCENT, DANGER, MUTED, SUCCESS, WARNING, dot, error_banner, field, scroll_section, section,
+};
 use crate::{connection, settings};
 use flixparty_core::config::default_playback_key;
 use flixparty_core::periphery::key_name;
@@ -308,7 +310,7 @@ fn session_view(mut g: Globals) -> Element {
         ],
     );
 
-    let members = section(
+    let members = scroll_section(
         &format!("Members ({})", session.members.len()),
         session
             .members
@@ -339,31 +341,30 @@ fn session_view(mut g: Globals) -> Element {
             })
             .collect()
     };
-    let activity = section("Activity", activity);
+    let activity = scroll_section("Activity", activity);
 
-    ScrollView::new()
+    // Members and activity share the height left over by the status section
+    // and the button row, so the button always stays at the bottom.
+    rect()
         .expanded()
+        .padding(16.)
+        .spacing(14.)
+        .content(Content::Flex)
+        .child(status)
+        .child(members)
+        .child(activity)
         .child(
             rect()
                 .width(Size::fill())
-                .padding(16.)
-                .spacing(14.)
-                .child(status)
-                .child(members)
-                .child(activity)
+                .cross_align(Alignment::end())
                 .child(
-                    rect()
-                        .width(Size::fill())
-                        .cross_align(Alignment::end())
-                        .child(
-                            Button::new()
-                                .on_press(move |_| {
-                                    connection::disconnect();
-                                    g.session.set(None);
-                                    g.view.set(View::Settings);
-                                })
-                                .child("Disconnect"),
-                        ),
+                    Button::new()
+                        .on_press(move |_| {
+                            connection::disconnect();
+                            g.session.set(None);
+                            g.view.set(View::Settings);
+                        })
+                        .child("Disconnect"),
                 ),
         )
         .into()

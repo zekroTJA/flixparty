@@ -26,6 +26,34 @@ pub fn section(title: &str, children: Vec<Element>) -> Element {
         .into()
 }
 
+/// A [`section`] that takes a share of the remaining height of its parent,
+/// which needs `Content::Flex`, and scrolls its content when it overflows.
+pub fn scroll_section(title: &str, children: Vec<Element>) -> Element {
+    Card::new()
+        .width(Size::fill())
+        .height(Size::flex(1.))
+        .min_height(Size::px(120.))
+        .child(
+            rect()
+                .expanded()
+                .content(Content::Flex)
+                .spacing(10.)
+                .child(
+                    label()
+                        .text(title.to_string())
+                        .font_size(16.)
+                        .font_weight(FontWeight::BOLD),
+                )
+                .child(
+                    ScrollView::new()
+                        .width(Size::fill())
+                        .height(Size::flex(1.))
+                        .child(rect().width(Size::fill()).spacing(6.).children(children)),
+                ),
+        )
+        .into()
+}
+
 pub fn field(name: &str, hint: Option<&str>, input: impl Into<Element>) -> Element {
     let mut caption = name.to_string();
     if let Some(hint) = hint {
