@@ -34,12 +34,12 @@ pub fn is_browser_in_focus(
 
     debug!(fg_title, fg_class);
 
-    // Configured class name matches or window title contains matches
-    if class.is_some_and(|c| c.as_ref() == &fg_class)
-        || title_contains.is_some_and(|t| fg_title.contains(t.as_ref()))
-    {
-        debug!("Configured class or title matches");
-        return true;
+    if let Some(class) = class {
+        return class.as_ref() == &fg_class;
+    }
+
+    if let Some(title_contains) = title_contains {
+        return fg_title.contains(title_contains.as_ref());
     }
 
     let browser_classes = [
