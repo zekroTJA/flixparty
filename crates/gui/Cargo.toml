@@ -1,0 +1,23 @@
+[package]
+name = "flixparty-gui"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[[bin]]
+name = "flixparty"
+path = "src/main.rs"
+
+[dependencies]
+flixparty-core.workspace = true
+anyhow.workspace = true
+tracing.workspace = true
+tracing-subscriber = { workspace = true, features = ["chrono"] }
+directories = "6"
+freya = "0.4.3"
+futures-channel = "0.3"
+futures-lite = "2"
+rdev = "0.5.3"
+toml = "0.9"
+serde = "1.0.228"
+chrono = "0.4"

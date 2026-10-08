@@ -1,5 +1,5 @@
 use frontmost::app::FrontmostApp;
-use frontmost::{start_nsrunloop, Detector};
+use frontmost::{Detector, start_nsrunloop};
 use std::sync::{Mutex, OnceLock};
 use tracing::{debug, error};
 
@@ -24,9 +24,19 @@ impl FrontmostApp for AppWatcher {
     fn update(&mut self) {}
 }
 
-pub fn start_watcher() {
+/// Registers the frontmost app observer. Must be called once on the main
+/// thread, which then has to run an NSRunLoop (through [`start_watcher`] or a
+/// GUI event loop).
+pub fn init_watcher() {
     Detector::init(Box::new(AppWatcher));
-    debug!("window watcher initialized; starting event loop ...");
+    debug!("window watcher initialized");
+}
+
+/// Registers the observer and runs the NSRunLoop on the current (main) thread.
+/// Does not return.
+pub fn start_watcher() {
+    init_watcher();
+    debug!("starting event loop ...");
     start_nsrunloop!();
 }
 

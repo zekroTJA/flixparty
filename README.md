@@ -28,13 +28,24 @@ from [redis.io](https://redis.io/).
 
 Then, [download](https://github.com/zekroTJA/flixparty/releases) or build the client application.
 
-After that, you need a config file. You can simply use the provided
+### GUI
+
+The `flixparty` binary is a desktop app. Enter your keys, the Redis connection details and
+optional window conditions, then click **Connect**. The settings are saved in your OS config
+directory (e.g. `%APPDATA%\flixparty\config\config.toml` on Windows,
+`~/.config/flixparty/config.toml` on Linux, `~/Library/Application Support/flixparty/config.toml`
+on macOS). While connected, you see all clients in the channel and who toggled the playback.
+**Show Logs** opens a window with the application logs.
+
+### CLI
+
+The `flixparty-cli` binary runs without a UI. You need a config file for it. You can simply use the provided
 [example config](flixparty.config.toml) as a starting point. Defaultly, the client looks for a
 `flixparty.config.toml` in the current working directory (the directory where you launch the app
 from). Alternatively, you can pass a path to a config file, if you want to store it somewhere else.
 
 ```
-./flixparty path/to/my/config.toml
+./flixparty-cli path/to/my/config.toml
 ```
 
 In the config, set the address of your redis instance as `address` in the `connection` block. Also,

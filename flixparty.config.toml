@@ -14,8 +14,18 @@ log_level = "debug"
 # playback = "Space"
 
 [connection]
-# The address to the central Redis instance.
+# The address to the central Redis instance. Either "host:port" or a full
+# "redis://" (or "rediss://" for TLS) URL.
 address = "redis://:foobar@127.0.0.1:16379/0"
+# # Connect via TLS. Only needed when address is given as "host:port".
+# # default value: false
+# tls = false
+# # Redis username and password. These override the ones in the address URL.
+# username = "default"
+# password = "foobar"
+# # Your name as shown to the other clients.
+# # default value: your OS user name
+# name = "Alice"
 # The cannel to connect to. All clients in the same
 # channel will be connected and will be able to control
 # the playback for each client in the same channel.
