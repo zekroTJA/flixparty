@@ -39,12 +39,29 @@ impl freya::prelude::App for App {
     }
 }
 
-fn header(g: Globals) -> Element {
+fn header(mut g: Globals) -> Element {
+    let action = match *g.view.read() {
+        View::Settings => Button::new()
+            .compact()
+            .filled()
+            .on_press(move |_| on_connect(g))
+            .child("Connect"),
+        View::Session => Button::new()
+            .compact()
+            .on_press(move |_| {
+                connection::disconnect();
+                g.session.set(None);
+                g.view.set(View::Settings);
+            })
+            .child("Disconnect"),
+    };
+
     rect()
         .width(Size::fill())
         .horizontal()
         .content(Content::Flex)
         .cross_align(Alignment::center())
+        .spacing(8.)
         .padding((10., 16.))
         .background((30, 30, 30))
         .child(
@@ -54,6 +71,7 @@ fn header(g: Globals) -> Element {
                 .font_size(20.)
                 .font_weight(FontWeight::BOLD),
         )
+        .child(action)
         .child(
             Button::new()
                 .compact()
@@ -166,18 +184,7 @@ fn settings_view(g: Globals) -> Element {
                 .child(keys)
                 .child(connection)
                 .child(conditions)
-                .maybe_child(error.map(error_banner))
-                .child(
-                    rect()
-                        .width(Size::fill())
-                        .cross_align(Alignment::end())
-                        .child(
-                            Button::new()
-                                .filled()
-                                .on_press(move |_| on_connect(g))
-                                .child("Connect"),
-                        ),
-                ),
+                .maybe_child(error.map(error_banner)),
         )
         .into()
 }
@@ -272,7 +279,7 @@ fn on_connect(mut g: Globals) {
 
 // --- Session --------------------------------------------------------------
 
-fn session_view(mut g: Globals) -> Element {
+fn session_view(g: Globals) -> Element {
     let session = g.session.read();
     let Some(session) = session.as_ref() else {
         return rect().into();
@@ -343,8 +350,7 @@ fn session_view(mut g: Globals) -> Element {
     };
     let activity = scroll_section("Activity", activity);
 
-    // Members and activity share the height left over by the status section
-    // and the button row, so the button always stays at the bottom.
+    // Members and activity share the height left over by the status section.
     rect()
         .expanded()
         .padding(16.)
@@ -353,20 +359,6 @@ fn session_view(mut g: Globals) -> Element {
         .child(status)
         .child(members)
         .child(activity)
-        .child(
-            rect()
-                .width(Size::fill())
-                .cross_align(Alignment::end())
-                .child(
-                    Button::new()
-                        .on_press(move |_| {
-                            connection::disconnect();
-                            g.session.set(None);
-                            g.view.set(View::Settings);
-                        })
-                        .child("Disconnect"),
-                ),
-        )
         .into()
 }
 
