@@ -1,3 +1,4 @@
+use tracing::debug;
 use windows::Win32::UI::WindowsAndMessaging::{GetClassNameW, GetForegroundWindow, GetWindowTextW};
 
 fn get_foreground_window_info() -> Option<(String, String)> {
@@ -31,9 +32,13 @@ pub fn is_browser_in_focus(
         return false;
     };
 
+    debug!(fg_title, fg_class);
+
+    // Configured class name matches or window title contains matches
     if class.is_some_and(|c| c.as_ref() == &fg_class)
         || title_contains.is_some_and(|t| fg_title.contains(t.as_ref()))
     {
+        debug!("Configured class or title matches");
         return true;
     }
 
@@ -48,6 +53,8 @@ pub fn is_browser_in_focus(
 
     let class_match = browser_classes.iter().any(|&c| fg_class == c);
     let title_match = browser_title_hints.iter().any(|&t| fg_title.contains(t));
+
+    debug!(title_match, class_match);
 
     class_match || title_match
 }
