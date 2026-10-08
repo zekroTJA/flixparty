@@ -13,6 +13,7 @@ mod widgets;
 
 use app::App;
 use freya::prelude::*;
+use freya::winit::event_loop::{DeviceEvents, EventLoop};
 use futures_channel::mpsc::unbounded;
 use state::{Globals, pump_events, pump_keys, pump_logs};
 
@@ -34,8 +35,19 @@ fn main() {
         let _ = key_tx.unbounded_send(key);
     });
 
+    // By default, winit registers the window for raw keyboard input while it's
+    // focused. On Windows, that keeps the low-level keyboard hook in this
+    // process from being called (and stalls the hook chain of all other
+    // processes), so no key presses are seen while a flixparty window is
+    // focused. freya doesn't use device events, so turn them off.
+    let event_loop = EventLoop::<NativeEvent>::with_user_event()
+        .build()
+        .expect("Failed to create event loop.");
+    event_loop.listen_device_events(DeviceEvents::Never);
+
     launch(
         LaunchConfig::new()
+            .with_event_loop(event_loop)
             .with_future(move |_| pump_logs(logs, globals.logs))
             .with_future(move |_| pump_events(events, globals))
             .with_future(move |_| pump_keys(keys, globals.form))

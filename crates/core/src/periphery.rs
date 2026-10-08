@@ -102,3 +102,28 @@ pub fn key_name(key: Key) -> String {
         _ => name,
     }
 }
+
+#[cfg(test)]
+mod test {
+    use super::*;
+    use std::sync::mpsc;
+    use std::time::Duration;
+
+    /// Installs a real global hook and sends real key events, so it's not run
+    /// by default. F13 is used as it's not bound to anything usually.
+    #[test]
+    #[ignore]
+    fn receives_simulated_key() {
+        let key = Key::Unknown(124); // VK_F13 on Windows
+        let (tx, rx) = mpsc::channel();
+        let _subscription = subscribe(move |k| {
+            let _ = tx.send(k);
+        });
+        // Give the listener thread time to install the hook.
+        thread::sleep(Duration::from_millis(500));
+
+        simulate_press(key).unwrap();
+        let received = rx.recv_timeout(Duration::from_secs(2)).expect("key press");
+        assert_eq!(received, key);
+    }
+}

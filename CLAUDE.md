@@ -81,6 +81,9 @@ Cargo workspace with three crates:
     Views are plain functions without hooks, so switching views can't break hook order. Background
     sources (session events, log lines, key presses) are sent over futures channels and applied
     to the state by `pump_*` futures registered with `LaunchConfig::with_future`.
+  - `main.rs` passes a custom winit event loop with `DeviceEvents::Never`. winit's default raw
+    keyboard input registration keeps Windows from calling the process's own low-level keyboard
+    hook while a flixparty window is focused, so keys couldn't be recorded. Don't remove it.
   - `connection.rs`: owns the running `Session` (outside UI state so it can be shut down after the
     event loop exits). Events are tagged with a session generation, so stale events from a
     session that's still stopping are ignored.
