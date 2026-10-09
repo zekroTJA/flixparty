@@ -97,14 +97,6 @@ fn settings_view(g: Globals) -> Element {
         address = address.theme_colors(invalid_input_colors());
     }
 
-    let keys = section(
-        "Key Configuration",
-        vec![
-            key_field(g, "Toggle Key", KeyTarget::Toggle),
-            key_field(g, "Playback Key", KeyTarget::Playback),
-        ],
-    );
-
     let connection = section(
         "Connection Information",
         vec![
@@ -148,6 +140,14 @@ fn settings_view(g: Globals) -> Element {
         ],
     );
 
+    let keys = section(
+        "Key Configuration",
+        vec![
+            key_field(g, "Toggle Key", KeyTarget::Toggle),
+            key_field(g, "Playback Key", KeyTarget::Playback),
+        ],
+    );
+
     let mut conditions = Vec::new();
     if cfg!(target_os = "windows") {
         conditions.push(field(
@@ -184,8 +184,8 @@ fn settings_view(g: Globals) -> Element {
                 .width(Size::fill())
                 .padding(16.)
                 .spacing(14.)
-                .child(keys)
                 .child(connection)
+                .child(keys)
                 .child(conditions),
         )
         .into()
