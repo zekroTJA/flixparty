@@ -59,11 +59,30 @@ pub fn field(name: &str, hint: Option<&str>, input: impl Into<Element>) -> Eleme
     if let Some(hint) = hint {
         caption.push_str(&format!(" ({hint})"));
     }
+    labeled(caption, MUTED, input)
+}
 
+/// A field that must be filled in. `missing` marks the label red; the input
+/// should be marked with [`invalid_input_colors`].
+pub fn required_field(name: &str, missing: bool, input: impl Into<Element>) -> Element {
+    labeled(
+        name.to_string(),
+        if missing { DANGER } else { MUTED },
+        input,
+    )
+}
+
+pub fn invalid_input_colors() -> InputColorsThemePartial {
+    InputColorsThemePartial::new()
+        .border_fill(DANGER)
+        .focus_border_fill(DANGER)
+}
+
+fn labeled(caption: String, color: (u8, u8, u8), input: impl Into<Element>) -> Element {
     rect()
         .width(Size::fill())
         .spacing(4.)
-        .child(label().text(caption).font_size(13.).color(MUTED))
+        .child(label().text(caption).font_size(13.).color(color))
         .child(input)
         .into()
 }

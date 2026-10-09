@@ -31,6 +31,9 @@ pub struct Form {
     pub playback_key: State<Key>,
     /// Which key is currently being recorded.
     pub recording: State<Option<KeyTarget>>,
+    /// Whether to mark required fields that are empty, set after a connect
+    /// attempt with missing values.
+    pub show_missing: State<bool>,
     pub address: State<String>,
     pub tls: State<bool>,
     pub username: State<String>,
@@ -48,6 +51,7 @@ impl Form {
             toggle_key: State::create_global(cfg.keys.toggle),
             playback_key: State::create_global(cfg.keys.playback),
             recording: State::create_global(None),
+            show_missing: State::create_global(false),
             address: State::create_global(c.address.clone()),
             tls: State::create_global(c.tls),
             username: State::create_global(c.username.clone().unwrap_or_default()),

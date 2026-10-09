@@ -1,7 +1,8 @@
 use crate::log_window::open_log_window;
 use crate::state::{ActivityKind, Globals, KeyTarget, Member, SessionInfo, Status, View};
 use crate::widgets::{
-    ACCENT, DANGER, MUTED, SUCCESS, WARNING, dot, error_banner, field, scroll_section, section,
+    ACCENT, DANGER, MUTED, SUCCESS, WARNING, dot, error_banner, field, invalid_input_colors,
+    required_field, scroll_section, section,
 };
 use crate::{connection, settings};
 use flixparty_core::config::default_playback_key;
@@ -85,6 +86,14 @@ fn header(mut g: Globals) -> Element {
 
 fn settings_view(g: Globals) -> Element {
     let form = g.form;
+    let address_missing = *form.show_missing.read() && form.address.read().trim().is_empty();
+
+    let mut address = Input::new(form.address)
+        .placeholder("redis.example.com:6379")
+        .width(Size::fill());
+    if address_missing {
+        address = address.theme_colors(invalid_input_colors());
+    }
 
     let keys = section(
         "Key Configuration",
@@ -97,13 +106,7 @@ fn settings_view(g: Globals) -> Element {
     let connection = section(
         "Connection Information",
         vec![
-            field(
-                "Redis Address",
-                None,
-                Input::new(form.address)
-                    .placeholder("redis.example.com:6379")
-                    .width(Size::fill()),
-            ),
+            required_field("Redis Address", address_missing, address),
             rect()
                 .horizontal()
                 .spacing(10.)
@@ -248,6 +251,15 @@ fn key_field(g: Globals, name: &str, target: KeyTarget) -> Element {
 
 fn on_connect(mut g: Globals) {
     g.form.recording.set(None);
+
+    // Missing required fields are marked in the form instead of reported as an
+    // error. The marks go away as soon as the fields are filled in.
+    if g.form.address.read().trim().is_empty() {
+        g.form.show_missing.set(true);
+        g.error.set(None);
+        return;
+    }
+    g.form.show_missing.set(false);
 
     let cfg = g.form.to_config(&g.config.read());
     if let Err(err) = cfg.validate() {
