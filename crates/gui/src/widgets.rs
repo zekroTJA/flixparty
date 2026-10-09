@@ -6,7 +6,7 @@ pub const MUTED: (u8, u8, u8) = (150, 150, 150);
 pub const ACCENT: (u8, u8, u8) = (64, 156, 255);
 pub const SUCCESS: (u8, u8, u8) = (80, 200, 120);
 pub const WARNING: (u8, u8, u8) = (240, 180, 60);
-pub const DANGER: (u8, u8, u8) = (235, 90, 90);
+pub const ERROR: (u8, u8, u8) = (235, 90, 90);
 
 pub fn section(title: &str, children: Vec<Element>) -> Element {
     Card::new()
@@ -65,17 +65,13 @@ pub fn field(name: &str, hint: Option<&str>, input: impl Into<Element>) -> Eleme
 /// A field that must be filled in. `missing` marks the label red; the input
 /// should be marked with [`invalid_input_colors`].
 pub fn required_field(name: &str, missing: bool, input: impl Into<Element>) -> Element {
-    labeled(
-        name.to_string(),
-        if missing { DANGER } else { MUTED },
-        input,
-    )
+    labeled(name.to_string(), if missing { ERROR } else { MUTED }, input)
 }
 
 pub fn invalid_input_colors() -> InputColorsThemePartial {
     InputColorsThemePartial::new()
-        .border_fill(DANGER)
-        .focus_border_fill(DANGER)
+        .border_fill(ERROR)
+        .focus_border_fill(ERROR)
 }
 
 fn labeled(caption: String, color: (u8, u8, u8), input: impl Into<Element>) -> Element {
@@ -93,16 +89,5 @@ pub fn dot(color: (u8, u8, u8)) -> Element {
         .height(Size::px(10.))
         .corner_radius(5.)
         .background(color)
-        .into()
-}
-
-pub fn error_banner(text: String) -> Element {
-    rect()
-        .width(Size::fill())
-        .padding(10.)
-        .corner_radius(6.)
-        .background((90, 30, 30))
-        .color((255, 220, 220))
-        .child(label().text(text))
         .into()
 }

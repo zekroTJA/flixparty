@@ -1,5 +1,5 @@
 use crate::state::Globals;
-use crate::widgets::{DANGER, MUTED, WARNING};
+use crate::widgets::{ERROR, MUTED, WARNING};
 use freya::prelude::*;
 use tracing::Level;
 
@@ -55,7 +55,7 @@ fn log_window(g: Globals) -> impl IntoElement {
     let logs = g.logs.read();
     let lines = logs.iter().filter(|l| l.level <= max_level).map(|l| {
         let color = match l.level {
-            Level::ERROR => DANGER,
+            Level::ERROR => ERROR,
             Level::WARN => WARNING,
             Level::INFO => (220, 220, 220),
             _ => MUTED,

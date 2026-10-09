@@ -9,6 +9,7 @@ mod log_window;
 mod logging;
 mod settings;
 mod state;
+mod toast;
 mod widgets;
 
 use app::App;

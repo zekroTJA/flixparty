@@ -1383,6 +1383,7 @@ name = "flixparty-gui"
 version = "0.9.0"
 dependencies = [
  "anyhow",
+ "async-io",
  "chrono",
  "directories",
  "flixparty-core",

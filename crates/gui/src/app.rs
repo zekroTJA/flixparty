@@ -1,8 +1,9 @@
 use crate::log_window::open_log_window;
 use crate::state::{ActivityKind, Globals, KeyTarget, Member, SessionInfo, Status, View};
+use crate::toast::ErrorToast;
 use crate::widgets::{
-    ACCENT, DANGER, MUTED, SUCCESS, WARNING, dot, error_banner, field, invalid_input_colors,
-    required_field, scroll_section, section,
+    ACCENT, ERROR, MUTED, SUCCESS, WARNING, dot, field, invalid_input_colors, required_field,
+    scroll_section, section,
 };
 use crate::{connection, settings};
 use flixparty_core::config::default_playback_key;
@@ -37,6 +38,7 @@ impl freya::prelude::App for App {
                     .height(Size::flex(1.))
                     .child(body),
             )
+            .child(ErrorToast { globals: g })
     }
 }
 
@@ -175,8 +177,6 @@ fn settings_view(g: Globals) -> Element {
     );
     let conditions = section("Conditions", conditions);
 
-    let error = g.error.read().clone();
-
     ScrollView::new()
         .expanded()
         .child(
@@ -186,8 +186,7 @@ fn settings_view(g: Globals) -> Element {
                 .spacing(14.)
                 .child(keys)
                 .child(connection)
-                .child(conditions)
-                .maybe_child(error.map(error_banner)),
+                .child(conditions),
         )
         .into()
 }
@@ -304,7 +303,7 @@ fn session_view(g: Globals) -> Element {
             WARNING,
             format!("Reconnecting ({remaining} retries left): {error}"),
         ),
-        Status::Disconnected => (DANGER, "Disconnected".to_string()),
+        Status::Disconnected => (ERROR, "Disconnected".to_string()),
     };
 
     let status = section(
