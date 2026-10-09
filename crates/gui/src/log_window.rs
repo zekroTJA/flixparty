@@ -1,9 +1,13 @@
 use crate::state::Globals;
 use crate::widgets::{ERROR, MUTED, WARNING};
+use async_io::Timer;
 use freya::prelude::*;
-use tracing::Level;
+use std::time::Duration;
+use tracing::{Level, error};
 
 const LEVELS: [Level; 4] = [Level::ERROR, Level::WARN, Level::INFO, Level::DEBUG];
+/// How long the copy button shows "Copied!".
+const COPIED_FEEDBACK: Duration = Duration::from_millis(1500);
 
 #[cfg(target_os = "windows")]
 const MONOSPACE: &str = "Consolas";
@@ -38,6 +42,7 @@ fn log_window(g: Globals) -> impl IntoElement {
 
     let mut level = use_state(|| Level::INFO);
     let mut follow = use_state(|| true);
+    let mut copied = use_state(|| false);
     let mut scroll = use_scroll_controller(|| ScrollConfig {
         default_vertical_position: ScrollPosition::End,
         ..Default::default()
@@ -100,6 +105,32 @@ fn log_window(g: Globals) -> impl IntoElement {
                 .child("Follow"),
         )
         .child(rect().width(Size::flex(1.)))
+        .child(
+            Button::new()
+                .compact()
+                .on_press(move |_| {
+                    let max_level = *level.peek();
+                    let text = g
+                        .logs
+                        .peek()
+                        .iter()
+                        .filter(|l| l.level <= max_level)
+                        .map(|l| l.text.as_str())
+                        .collect::<Vec<_>>()
+                        .join("\n");
+                    match Clipboard::set(text) {
+                        Ok(()) => {
+                            copied.set(true);
+                            spawn(async move {
+                                Timer::after(COPIED_FEEDBACK).await;
+                                copied.set(false);
+                            });
+                        }
+                        Err(err) => error!("Failed copying logs to the clipboard: {err:?}"),
+                    }
+                })
+                .child(if *copied.read() { "Copied!" } else { "Copy" }),
+        )
         .child(
             Button::new()
                 .compact()
