@@ -2,8 +2,8 @@ use crate::log_window::open_log_window;
 use crate::state::{ActivityKind, Globals, KeyTarget, Member, SessionInfo, Status, View};
 use crate::toast::ErrorToast;
 use crate::widgets::{
-    ACCENT, ERROR, MUTED, SUCCESS, WARNING, dot, field, invalid_input_colors, required_field,
-    scroll_section, section,
+    ACCENT, ERROR, MUTED, SUCCESS, WARNING, app_theme, dot, field, invalid_input_colors,
+    required_field, scroll_section, section,
 };
 use crate::{connection, settings};
 use flixparty_core::config::default_playback_key;
@@ -20,7 +20,7 @@ pub struct App {
 
 impl freya::prelude::App for App {
     fn render(&self) -> impl IntoElement {
-        use_init_theme(dark_theme);
+        use_init_theme(app_theme);
         let g = self.globals;
 
         let body = match *g.view.read() {
@@ -45,14 +45,22 @@ impl freya::prelude::App for App {
 }
 
 fn header(mut g: Globals) -> Element {
-    let action = match *g.view.read() {
-        View::Settings => Button::new()
+    // Connect and Disconnect share an accent outline with the default text color.
+    let action_button = || {
+        Button::new()
             .compact()
-            .filled()
+            .outline()
+            .theme_colors(ButtonColorsThemePartial {
+                color: Some(Preference::Reference("text_primary")),
+                ..ButtonColorsThemePartial::new().border_fill(ACCENT)
+            })
+    };
+
+    let action = match *g.view.read() {
+        View::Settings => action_button()
             .on_press(move |_| on_connect(g))
             .child("Connect"),
-        View::Session => Button::new()
-            .compact()
+        View::Session => action_button()
             .on_press(move |_| {
                 connection::disconnect();
                 g.session.set(None);

@@ -1,5 +1,5 @@
 use crate::state::Globals;
-use crate::widgets::{ERROR, MUTED, WARNING};
+use crate::widgets::{ERROR, MUTED, WARNING, app_theme};
 use async_io::Timer;
 use freya::prelude::*;
 use std::time::Duration;
@@ -37,7 +37,7 @@ pub fn open_log_window(mut g: Globals) {
 }
 
 fn log_window(g: Globals) -> impl IntoElement {
-    use_init_theme(dark_theme);
+    use_init_theme(app_theme);
     let mut log_window = g.log_window;
     use_drop(move || log_window.set(None));
 

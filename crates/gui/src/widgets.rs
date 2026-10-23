@@ -3,10 +3,21 @@
 use freya::prelude::*;
 
 pub const MUTED: (u8, u8, u8) = (150, 150, 150);
-pub const ACCENT: (u8, u8, u8) = (64, 156, 255);
+pub const ACCENT: (u8, u8, u8) = (255, 0, 127);
 pub const SUCCESS: (u8, u8, u8) = (80, 200, 120);
 pub const WARNING: (u8, u8, u8) = (240, 180, 60);
 pub const ERROR: (u8, u8, u8) = (235, 90, 90);
+
+/// The dark theme with [`ACCENT`] as the primary color instead of the OS accent
+/// color. Secondary and tertiary are derived like freya does for the OS color.
+pub fn app_theme() -> Theme {
+    let accent = Color::from_rgb(ACCENT.0, ACCENT.1, ACCENT.2);
+    let mut theme = dark_theme();
+    theme.colors.primary = accent;
+    theme.colors.secondary = Color::lerp(accent, Color::WHITE, 0.65);
+    theme.colors.tertiary = Color::lerp(accent, Color::BLACK, 0.23);
+    theme
+}
 
 pub fn section(title: &str, children: Vec<Element>) -> Element {
     Card::new()
