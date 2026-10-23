@@ -94,4 +94,7 @@ Cargo workspace with three crates:
 
 - `flixparty.config.toml` is the documented example config that ships in the repo. Keep its
   comments up to date when you change config fields or defaults.
+- `assets/flixparty-icon.png` (window icon) and `assets/flixparty.ico` (Windows exe icon, embedded
+  by `crates/gui/build.rs` with `winresource`) are rendered from `assets/Flixparty-Icon.svg`.
+  Re-render both when the SVG changes. The header logo embeds `assets/Flixparty-Logo.svg` directly.
 - `private.*.toml` files are gitignored and meant for local configs with real credentials.

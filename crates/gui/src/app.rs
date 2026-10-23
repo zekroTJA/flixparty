@@ -12,6 +12,8 @@ use freya::prelude::*;
 use rdev::Key;
 use tracing::error;
 
+const LOGO: &[u8] = include_bytes!("../../../assets/Flixparty-Logo.svg");
+
 pub struct App {
     pub globals: Globals,
 }
@@ -68,11 +70,13 @@ fn header(mut g: Globals) -> Element {
         .padding((10., 16.))
         .background((30, 30, 30))
         .child(
-            label()
-                .width(Size::flex(1.))
-                .text("flixparty")
-                .font_size(20.)
-                .font_weight(FontWeight::BOLD),
+            rect().width(Size::flex(1.)).child(
+                // The logo's viewBox is 2570x355.
+                SvgViewer::new(LOGO)
+                    .show_loader(false)
+                    .width(Size::px(174.))
+                    .height(Size::px(24.)),
+            ),
         )
         .child(action)
         .child(

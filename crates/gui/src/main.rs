@@ -18,6 +18,9 @@ use freya::winit::event_loop::{DeviceEvents, EventLoop};
 use futures_channel::mpsc::unbounded;
 use state::{Globals, pump_events, pump_keys, pump_logs};
 
+/// Rendered from `assets/Flixparty-Icon.svg`, like `assets/flixparty.ico`.
+pub const ICON: &[u8] = include_bytes!("../../../assets/flixparty-icon.png");
+
 fn main() {
     let logs = logging::init();
 
@@ -55,6 +58,7 @@ fn main() {
             .with_window(
                 WindowConfig::new_app(App { globals })
                     .with_title("flixparty")
+                    .with_icon(LaunchConfig::window_icon(ICON))
                     .with_size(560., 760.)
                     .with_min_size(420., 480.)
                     // Also close the log window, if open.

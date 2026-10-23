@@ -28,6 +28,7 @@ pub fn open_log_window(mut g: Globals) {
             .launch_window(
                 WindowConfig::new(move || log_window(g))
                     .with_title("flixparty - Logs")
+                    .with_icon(LaunchConfig::window_icon(crate::ICON))
                     .with_size(900., 500.),
             )
             .await;
